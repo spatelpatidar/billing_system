@@ -1,0 +1,264 @@
+<h1 style="margin-left: 47%;">Billing Page</h1>
+
+
+<% if flash[:alert] %>
+  <p style="color:red;"><%= flash[:alert] %></p>
+<% end %>
+
+<%= form_with url: orders_path, scope: :order do |f| %>
+  <div style="display: flex; align-items: center; margin-bottom: 24px; font-family: 'Inter', sans-serif;">
+  <%= f.label :email, "Customer Email", 
+      style: "width: 130px; font-size: 14px; font-weight: 700; color: #374151; margin-right: 20px;" %>
+  
+  <div style="flex: 1; position: relative; display: flex; align-items: center;">
+    <%= f.email_field :email, 
+        required: true, 
+        placeholder: "Enter customer email...",
+        style: "width: 30%; padding: 12px 16px; background-color: #ffffff; border: 1.5px solid #e5e7eb; border-radius: 12px; font-size: 14px; color: #1f2937; outline: none; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" %>
+  </div>
+</div>
+
+  <hr>
+
+  <div class="bill-container" style="max-width: 800px; font-family: sans-serif; padding: 20px;">
+    <div class="bill-header" style="display: flex; align-items: center; margin-bottom: 25px;">
+      <button type="button" 
+              onclick="addProduct()" 
+              style="margin-left: 85%; background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s;">
+        Add New
+      </button>
+    </div>
+    <div id="products-list">
+      <div class="product-row" style="display: flex; align-items: center; margin-bottom: 15px;">
+        <label style="width: 100px; font-weight: bold; font-size: 14px; color: #333;">Bill section</label>
+
+        <div class="input-group" style="display: flex; gap: 15px; margin-left: 8%; flex: 1;">
+          
+          <select class="product-select" required
+                  style="flex: 1.5; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; outline: none; font-size: 14px; background-color: white; cursor: pointer;">
+            <option value="" disabled selected>Select Product</option>
+            <% @products.each do |product| %>
+              <option value="<%= product.product_code %>"><%= product.name %></option>
+            <% end %>
+          </select>
+
+          <input name="items[0][product_code]" 
+                type="text" 
+                class="product-code-input"
+                placeholder="Product Code"
+                readonly
+                style="flex: 0.5; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
+          
+          <input name="items[0][quantity]" 
+                type="number" 
+                min="1" 
+                placeholder="Quantity" 
+                required 
+                style="flex: 0.5; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
+                 <!-- Remove button -->
+    </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+
+  <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #1f2937; letter-spacing: -0.5px;">Denominations</h3>
+
+
+  <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-left: 8%; margin-bottom: 30px; font-family: sans-serif; max-width: 500px;" id="denominations-container">
+  <% @denominations.each do |d| %>
+    <div class="denomination-row" data-value="<%= d.value %>" style="display: flex; align-items: center; background: #ffffff; padding: 10px 16px; border-radius: 14px; border: 1.5px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      
+      <label style="font-weight: 800; font-size: 14px; color: #4b5563; min-width: 80px;">
+        <%= d.value %> Note
+      </label>
+
+      <div style="height: 20px; width: 1.5px; background: #e5e7eb; margin: 0 15px;"></div>
+      
+      <div style="display: flex; align-items: center; flex: 1;">
+        <span style="font-size: 14px; color: #9ca3af; font-weight: bold; margin-right: 8px;">x</span>
+        <input type="number"
+          name="payments[<%= d.value %>]"
+          class="denomination-input"
+          min="0"
+          value="0"
+          style="width: 100%; border: none; background: transparent; font-weight: 700; font-size: 16px; color: #111827; outline: none; text-align: left;">
+      </div>
+      
+    </div>
+  <% end %>
+</div>
+
+<div style="background: #f3f4f6; padding: 16px 20px; border-radius: 16px; display: flex; align-items: center; justify-content: flex-start; gap: 20px; border: 1px solid #e5e7eb; max-width: 500px;">
+  <label style="font-size: 15px; font-weight: 800; color: #374151; min-width: 160px;">
+    Cash Paid by Customer
+  </label>
+
+  <div style="position: relative; display: flex; align-items: center;">
+    <span style="position: absolute; left: 12px; font-weight: bold; color: #9ca3af;">₹</span>
+    <input type="number"
+           id="cash-paid"
+           name="cash_paid"
+           min="0"
+           step="1"
+           placeholder="0.00"
+           required
+           style="width: 150px; padding: 10px 12px 10px 30px; border-radius: 10px; border: 1.5px solid #d1d5db; font-size: 16px; font-weight: 700; color: #111827; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); background: #ffffff;">
+  </div>
+</div>
+
+<div style="display: flex; justify-content: flex-end; margin-top: 30px; padding-bottom: 40px; gap: 10px;">
+  <%= link_to "Cancel", root_path, 
+    style: "
+      background: #ef4444;
+      color: white;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 5px 10px -3px rgba(239,68,68,0.3);
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1;
+      transition: all 0.3s ease;
+    ",
+    onmouseover: "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(239,68,68,0.4)';",
+    onmouseout: "this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 10px -3px rgba(239,68,68,0.3)';" %>
+  <%= f.submit "Generate Bill", 
+      style: "
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 14px 32px;
+        border: none;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        outline: none;
+      ",
+      onmouseover: "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 20px -3px rgba(16, 185, 129, 0.4)';",
+      onmouseout: "this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 15px -3px rgba(16, 185, 129, 0.3)';" %>
+
+</div>
+
+
+<% end %>
+
+<script>
+let index = 1;
+
+document.addEventListener("turbo:load", () => {
+  const denominationInputs = document.querySelectorAll(".denomination-input");
+  const cashPaidInput = document.getElementById("cash-paid");
+
+  function updateCashPaid() {
+    let total = 0;
+    denominationInputs.forEach(input => {
+      const row = input.closest(".denomination-row");
+      const value = parseInt(row.dataset.value) || 0;
+      const count = parseInt(input.value) || 0;
+      total += value * count;
+    });
+    cashPaidInput.value = total;
+  }
+
+  denominationInputs.forEach(input => {
+    input.addEventListener("input", updateCashPaid);
+  });
+
+  // Trigger initial calculation
+  updateCashPaid();
+});
+
+// Grab product options from Rails into JS
+const productOptions = `
+  <option value="" disabled selected>Select Product</option>
+  <% @products.each do |product| %>
+    <option value="<%= product.product_code %>"><%= product.name %></option>
+  <% end %>
+`;
+
+document.addEventListener("turbo:load", () => {
+  document.querySelectorAll(".product-select").forEach(select => attachSelectListener(select));
+});
+
+// Function to update product code field when dropdown changes
+function attachSelectListener(selectElement) {
+  selectElement.addEventListener("change", function() {
+    const input = this.closest(".input-group").querySelector(".product-code-input");
+    input.value = this.value; // show selected product_code
+  });
+}
+
+// Initialize existing selects on turbo load
+document.addEventListener("turbo:load", () => {
+  document.querySelectorAll(".product-select").forEach(select => attachSelectListener(select));
+});
+
+// Function to attach remove listener to a button
+function attachRemoveListener(buttonElement) {
+  buttonElement.addEventListener("click", () => {
+    buttonElement.closest(".product-row").remove();
+  });
+}
+
+document.addEventListener("turbo:load", () => {
+  document.querySelectorAll(".remove-product-btn").forEach(btn => attachRemoveListener(btn));
+});
+
+// Function to add new product row
+function addProduct() {
+  const container = document.getElementById("products-list");
+
+  const newRow = document.createElement("div");
+  newRow.className = "product-row";
+  newRow.style.display = "flex";
+  newRow.style.alignItems = "center";
+  newRow.style.marginBottom = "15px";
+
+  newRow.innerHTML = `
+    <label style="width: 100px;"></label>
+    <div class="input-group" style="display: flex; gap: 15px; margin-left: 8%; flex: 1; align-items: center;">
+      
+      <select class="product-select" required style="flex: 1.5; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; outline: none; font-size: 14px; background-color: white; cursor: pointer;">
+        ${productOptions}
+      </select>
+
+      <input name="items[${index}][product_code]" 
+             type="text" 
+             class="product-code-input"
+             placeholder="Product Code"
+             readonly
+             style="flex: 0.5; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
+
+      <input name="items[${index}][quantity]" 
+             type="number" 
+             min="1" 
+             placeholder="Quantity" 
+             required 
+             style="flex: 0.5; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
+
+      <button type="button" class="remove-product-btn"
+              style="background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold;">
+        ×
+      </button>
+    </div>
+  `;
+
+  container.appendChild(newRow);
+
+  // Attach listeners for new row
+  attachSelectListener(newRow.querySelector(".product-select"));
+  attachRemoveListener(newRow.querySelector(".remove-product-btn"));
+
+  index++;
+}
+</script>

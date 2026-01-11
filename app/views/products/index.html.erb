@@ -1,0 +1,61 @@
+<h1 style="text-align: center;">All Products</h1>
+
+<div style="max-width: 800px; margin: auto;">
+
+  <!-- TOP ACTION ROW -->
+  <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px;">
+
+    <%= form_with url: search_orders_path, method: :get, local: true,
+          style: "display: flex; gap: 8px; align-items: center;" do %>
+
+      <%= email_field_tag :email, nil,
+            placeholder: "Find orders by customer email",
+            required: true,
+            style: "width: 260px; padding: 8px;" %>
+
+      <%= submit_tag "Find with Email",
+        style: "
+          background: #10b981;
+          color: white;
+          padding: 10px 18px;
+          border-radius: 8px;
+          font-weight: bold;
+          cursor: pointer;
+          white-space: nowrap;
+          border: none;
+          text-decoration: none;
+        " %>
+
+    <% end %>
+
+    <%= link_to "Create Bill", new_order_path,
+          style: "background: #10b981; color: white; padding: 10px 18px; border-radius: 8px; font-weight: bold; text-decoration: none; white-space: nowrap;" %>
+
+  </div>
+
+
+  <!-- PRODUCTS TABLE -->
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <thead>
+      <tr>
+        <th style="border: 1px solid #ddd; padding: 10px;">Product Name</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Product Code</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Unit Price</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Tax %</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Stock Qty</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 10px;"><%= product.name %></td>
+          <td style="border: 1px solid #ddd; padding: 10px;"><%= product.product_code %></td>
+          <td style="border: 1px solid #ddd; padding: 10px;">₹<%= product.unit_price %></td>
+          <td style="border: 1px solid #ddd; padding: 10px;"><%= product.tax_percentage %>%</td>
+          <td style="border: 1px solid #ddd; padding: 10px;"><%= product.stock_quantity %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>

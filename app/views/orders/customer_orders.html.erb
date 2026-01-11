@@ -1,0 +1,29 @@
+<h2>Previous Purchases</h2>
+
+<p><strong>Customer:</strong> <%= @customer.email %></p>
+
+<table width="100%" border="1" cellpadding="8" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>Date</th>
+      <th>Total Amount</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td><%= order.id %></td>
+        <td><%= order.created_at.strftime("%d %b %Y") %></td>
+        <td><%= order.grand_total %></td>
+        <td>
+          <%= link_to "View",
+                order_path(order),
+                style: "padding: 6px 12px; background: #10b981; color: white; text-decoration: none;" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
