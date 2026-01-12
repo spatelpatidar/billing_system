@@ -52,6 +52,11 @@ RUN chmod +x bin/* && \
     sed -i 's/ruby\.exe$/ruby/' bin/*
 
 
+ENV RAILS_ENV=production \
+    SECRET_KEY_BASE=dummy_secret_key_for_build
+
+RUN bundle exec rails assets:precompile
+
 # Final stage for app image
 FROM base
 
