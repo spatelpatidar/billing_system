@@ -18,17 +18,27 @@ ENV RAILS_ENV="production" \
 FROM base as build
 
 # Install packages needed to build gems
+# RUN apt-get update -qq && \
+#     apt-get install --no-install-recommends -y build-essential git libvips pkg-config
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libvips pkg-config curl nodejs npm && \
-    npm install -g yarn \
-    libsqlite3-dev \
-    libssl-dev \
-    libffi-dev
+    apt-get install --no-install-recommends -y \
+        build-essential \
+        git \
+        libvips \
+        pkg-config \
+        libsqlite3-dev \
+        libssl-dev \
+        libffi-dev
+
 # Install application gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile --gemfile
+RUN bundle install
+RUN rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
+RUN bundle exec bootsnap precompile --gemfile
+
+# RUN bundle install && \
+#     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+#     bundle exec bootsnap precompile --gemfile
 
 # Copy application code
 COPY . .
@@ -41,10 +51,6 @@ RUN chmod +x bin/* && \
     sed -i "s/\r$//g" bin/* && \
     sed -i 's/ruby\.exe$/ruby/' bin/*
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-ENV RAILS_ENV=production \
-    SECRET_KEY_BASE=dummy_secret_key_for_build
-RUN ./bin/rails assets:precompile
 
 # Final stage for app image
 FROM base
