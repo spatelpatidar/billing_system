@@ -19,8 +19,11 @@ FROM base as build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libvips pkg-config
-
+    apt-get install --no-install-recommends -y build-essential git libvips pkg-config curl nodejs npm && \
+    npm install -g yarn \
+    libsqlite3-dev \
+    libssl-dev \
+    libffi-dev
 # Install application gems
 COPY Gemfile Gemfile.lock ./
 RUN bundle install && \
@@ -39,8 +42,9 @@ RUN chmod +x bin/* && \
     sed -i 's/ruby\.exe$/ruby/' bin/*
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
-
+ENV RAILS_ENV=production \
+    SECRET_KEY_BASE=dummy_secret_key_for_build
+RUN ./bin/rails assets:precompile
 
 # Final stage for app image
 FROM base
