@@ -1,5 +1,40 @@
 <h1 style="text-align: center;">All Products</h1>
 
+<% if flash[:notice] %>
+  <div
+    data-flash
+    style="
+      max-width:800px;
+      margin:15px auto;
+      padding:12px 16px;
+      background:#dcfce7;
+      color:#166534;
+      border-radius:8px;
+      font-weight:bold;
+      text-align:center;
+    ">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+
+<% if flash[:alert] %>
+  <div
+    data-flash
+    style="
+      max-width:800px;
+      margin:15px auto;
+      padding:12px 16px;
+      background:#fee2e2;
+      color:#991b1b;
+      border-radius:8px;
+      font-weight:bold;
+      text-align:center;
+    ">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
+
+
 <div style="max-width: 800px; margin: auto;">
 
   <!-- TOP ACTION ROW -->
@@ -28,6 +63,9 @@
 
     <% end %>
 
+    <%= link_to "Add Product", new_product_path,
+      style: "background:#2563eb; color:white; padding:10px 18px; border-radius:8px; font-weight:bold; text-decoration:none;" %>
+
     <%= link_to "Create Bill", new_order_path,
           style: "background: #10b981; color: white; padding: 10px 18px; border-radius: 8px; font-weight: bold; text-decoration: none; white-space: nowrap;" %>
 
@@ -43,6 +81,7 @@
         <th style="border: 1px solid #ddd; padding: 10px;">Unit Price</th>
         <th style="border: 1px solid #ddd; padding: 10px;">Tax %</th>
         <th style="border: 1px solid #ddd; padding: 10px;">Stock Qty</th>
+        <th style="border:1px solid #ddd; padding:10px;">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -53,9 +92,221 @@
           <td style="border: 1px solid #ddd; padding: 10px;">₹<%= product.unit_price %></td>
           <td style="border: 1px solid #ddd; padding: 10px;"><%= product.tax_percentage %>%</td>
           <td style="border: 1px solid #ddd; padding: 10px;"><%= product.stock_quantity %></td>
+          <td style="border:1px solid #ddd; padding:10px; text-align:center;">
+            <button
+              type="button"
+              onclick="window.location.href='<%= product_path(product) %>'"
+              style="margin-right:6px; background:#2563eb; color:white; font-weight:bold; padding:4px 10px; border:none; border-radius:6px;">
+              View
+            </button>
+
+            <button
+              type="button"
+              onclick="window.location.href='<%= edit_product_path(product) %>'"
+              style="margin-right:6px; background:#10b981; color:white; font-weight:bold; padding:4px 10px; border:none; border-radius:6px;">
+              Edit
+            </button>
+
+            <button
+              type="button"
+              onclick="openProductDeleteModal(<%= product.id %>)"
+              style="background:#ef4444; color:white; padding:4px 10px; border:none; border-radius:6px;">
+              Delete
+            </button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <h1 style="text-align:center;">Cash Denominations</h1>
+
+<div style="max-width: 700px; margin: auto;">
+  <!-- DENOMINATIONS TABLE -->
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #ddd; padding:10px;">Value (₹)</th>
+        <th style="border:1px solid #ddd; padding:10px;">Available Count</th>
+        <th style="border:1px solid #ddd; padding:10px;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @denominations.each do |denomination| %>
+        <tr>
+          <td style="border:1px solid #ddd; padding:10px;">
+            ₹<%= denomination.value %>
+          </td>
+
+          <td style="border:1px solid #ddd; padding:10px;">
+            <%= denomination.available_count %>
+          </td>
+
+          <td style="border:1px solid #ddd; padding:10px; text-align:center;">
+            <button
+              type="button"
+              onclick="openDeleteModal(<%= denomination.id %>)"
+              style="background:#ef4444; color:white; padding:6px 12px; border:none; border-radius:6px;">
+              Remove
+            </button>
+
+          </td>
         </tr>
       <% end %>
     </tbody>
   </table>
 
 </div>
+</div>
+<!-- DELETE CONFIRMATION MODAL -->
+<div id="deleteModal"
+     style="
+       display:none;
+       position:fixed;
+       top:0; left:0;
+       width:100%; height:100%;
+       background:rgba(0,0,0,0.5);
+       justify-content:center;
+       align-items:center;
+       z-index:1000;
+     ">
+
+  <div style="
+        background:white;
+        padding:20px;
+        border-radius:8px;
+        width:320px;
+        text-align:center;
+      ">
+
+    <h3>Confirm Deletion</h3>
+    <p>Are you sure you want to remove this denomination?</p>
+
+    <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="closeDeleteModal()"
+              style="background:#9ca3af; color:white; padding:8px 16px; border:none; border-radius:6px;">
+        No
+      </button>
+      <button onclick="confirmDelete()"
+              style="background:#ef4444; color:white; padding:8px 16px; border:none; border-radius:6px;">
+        Yes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT DELETE CONFIRMATION MODAL -->
+<div id="productDeleteModal"
+     style="
+       display:none;
+       position:fixed;
+       top:0; left:0;
+       width:100%; height:100%;
+       background:rgba(0,0,0,0.5);
+       justify-content:center;
+       align-items:center;
+       z-index:1000;
+     ">
+
+  <div style="
+        background:white;
+        padding:20px;
+        border-radius:8px;
+        width:320px;
+        text-align:center;
+      ">
+
+    <h3>Confirm Product Deletion</h3>
+    <p>Are you sure you want to delete this product?</p>
+
+    <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="closeProductDeleteModal()"
+              style="background:#9ca3af; color:white; padding:8px 16px; border:none; border-radius:6px;">
+        No
+      </button>
+      <button onclick="confirmProductDelete()"
+              style="background:#ef4444; color:white; padding:8px 16px; border:none; border-radius:6px;">
+        Yes
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let deleteDenominationId = null;
+
+  function openDeleteModal(id) {
+    deleteDenominationId = id;
+    document.getElementById("deleteModal").style.display = "flex";
+  }
+
+  function closeDeleteModal() {
+    deleteDenominationId = null;
+    document.getElementById("deleteModal").style.display = "none";
+  }
+
+  function confirmDelete() {
+    if (!deleteDenominationId) return;
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/denominations/" + deleteDenominationId;
+
+    const methodInput = document.createElement("input");
+    methodInput.type = "hidden";
+    methodInput.name = "_method";
+    methodInput.value = "delete";
+
+    const csrfToken = document.querySelector("meta[name='csrf-token']").content;
+    const csrfInput = document.createElement("input");
+    csrfInput.type = "hidden";
+    csrfInput.name = "authenticity_token";
+    csrfInput.value = csrfToken;
+
+    form.appendChild(methodInput);
+    form.appendChild(csrfInput);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+  setTimeout(() => {
+    document.querySelectorAll('[data-flash]').forEach(el => el.remove())
+  }, 3000)
+
+  let deleteProductId = null;
+
+  function openProductDeleteModal(id) {
+    deleteProductId = id;
+    document.getElementById("productDeleteModal").style.display = "flex";
+  }
+
+  function closeProductDeleteModal() {
+    deleteProductId = null;
+    document.getElementById("productDeleteModal").style.display = "none";
+  }
+
+  function confirmProductDelete() {
+    if (!deleteProductId) return;
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/products/" + deleteProductId;
+
+    const methodInput = document.createElement("input");
+    methodInput.type = "hidden";
+    methodInput.name = "_method";
+    methodInput.value = "delete";
+
+    const csrfToken = document.querySelector("meta[name='csrf-token']").content;
+    const csrfInput = document.createElement("input");
+    csrfInput.type = "hidden";
+    csrfInput.name = "authenticity_token";
+    csrfInput.value = csrfToken;
+
+    form.appendChild(methodInput);
+    form.appendChild(csrfInput);
+    document.body.appendChild(form);
+    form.submit();
+  }
+
+</script>

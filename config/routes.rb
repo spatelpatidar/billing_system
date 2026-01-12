@@ -12,11 +12,8 @@ Rails.application.routes.draw do
   get "/orders/search", to: "orders#search", as: :search_orders
   get "/orders/customer", to: "orders#customer_orders", as: :customer_orders
 
-  resources :products, only: [:index]
+  resources :products#, only: [:index]
   resources :orders, only: %i[new create show]
-
-  resources :orders do
-    post :send_bill, on: :member
-  end
+  resources :denominations, only: [:destroy]
 
 end
